@@ -3,7 +3,6 @@ import time
 import asyncio
 import websockets
 
-
         
 def crossfade(value1, value2, factor):
     """
@@ -37,6 +36,8 @@ async def hello():
             packet = []
             for lightindex in range(0, light_count*3):
                 channel_index_with_overflow = lightindex
+                if channel_index_with_overflow >= 511:
+                    channel_index_with_overflow += 2
                 universe = channel_index_with_overflow // 512
                 address = channel_index_with_overflow % 512
                 #print(universe, address)
@@ -44,9 +45,10 @@ async def hello():
                 if len(buffers[0]) + len(buffers[1]) +  len(buffers[2]) + len(buffers[3]) == 512  * 4:
                     val1 = buffers[universe][address]
                     val2 = buffers[universe+2][address]
-                    final_value = crossfade(val1, val2, 0)
+                    #print(buffers[1][91])
+                    final_value = crossfade(val1, val2, buffers[1][91] * (1/255))
                     packet.append(final_value)
-            print(str(packet))
+            #print(str(packet))
 
             await websocket.send(str(packet))
                 #print(len(buffer))
